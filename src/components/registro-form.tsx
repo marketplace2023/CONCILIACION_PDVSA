@@ -58,11 +58,11 @@ export function RegistroForm({
       <fieldset>
         <legend className="mb-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">Factura PDVSA</legend>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <Field label="N° Factura *" hint="En la factura: casilla FACTURA" error={errors.nro_factura} auto={autoFields?.has("nro_factura")}>
-            <input className={cls("nro_factura")} inputMode="numeric" value={value.nro_factura} onChange={set("nro_factura")} placeholder="321049798" />
-          </Field>
           <Field label="Fecha de emisión *" hint="En la factura: FECHA EMISION" error={errors.fecha_emision} auto={autoFields?.has("fecha_emision")}>
             <input type="date" className={cls("fecha_emision")} value={value.fecha_emision} onChange={set("fecha_emision")} />
+          </Field>
+          <Field label="Código" hint="En la factura: CLIENTE" auto={autoFields?.has("codigo")}>
+            <input className={cls("codigo")} inputMode="numeric" value={value.codigo} onChange={set("codigo")} />
           </Field>
           <Field label="Estación de servicio *" hint="En la factura: NRO. ORDEN" error={errors.estacion} auto={autoFields?.has("estacion")}>
             <input
@@ -78,14 +78,8 @@ export function RegistroForm({
               ))}
             </datalist>
           </Field>
-          <Field label="Código" hint="En la factura: CLIENTE" auto={autoFields?.has("codigo")}>
-            <input className={cls("codigo")} inputMode="numeric" value={value.codigo} onChange={set("codigo")} />
-          </Field>
-          <Field label="N° de control" hint="En la factura: Nº DE CONTROL" auto={autoFields?.has("nro_control")}>
-            <input className={cls("nro_control")} value={value.nro_control} onChange={set("nro_control")} placeholder="00-18812889" />
-          </Field>
-          <Field label="Total factura (Bs.)" hint="En la factura: Total a pagar (Bs.)" auto={autoFields?.has("total_factura")}>
-            <input className={cls("total_factura")} inputMode="decimal" value={value.total_factura} onChange={set("total_factura")} placeholder="5304400.32" />
+          <Field label="N° Factura *" hint="En la factura: casilla FACTURA" error={errors.nro_factura} auto={autoFields?.has("nro_factura")}>
+            <input className={cls("nro_factura")} inputMode="numeric" value={value.nro_factura} onChange={set("nro_factura")} placeholder="321049798" />
           </Field>
         </div>
       </fieldset>
@@ -103,12 +97,6 @@ export function RegistroForm({
             <input className={cls("referencia")} inputMode="numeric" value={value.referencia} onChange={set("referencia")} placeholder="112134782" />
           </Field>
         </div>
-        {value.total_factura && value.pago_bs && Math.abs(Number(value.total_factura) - Number(value.pago_bs)) > 0.009 && (
-          <p className="mt-2 rounded-lg bg-warning/15 px-3 py-2 text-xs text-foreground">
-            El pago ({Number(value.pago_bs).toLocaleString("es-VE")}) no coincide con el total de la factura (
-            {Number(value.total_factura).toLocaleString("es-VE")}). Explícalo en observaciones si es un pago parcial.
-          </p>
-        )}
       </fieldset>
 
       <Field label="Observaciones">
