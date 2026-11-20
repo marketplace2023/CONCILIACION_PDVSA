@@ -27,7 +27,11 @@ export function matchEstacion(text: string | null | undefined, estaciones: Estac
 const AMOUNT_RE = /(?<![\d.,])\d{1,3}(?:[.\s]\d{3})+,\d{2}(?!\d)/g;
 const DATE_RE = /(\d{2})\s?[./-]\s?(\d{2})\s?[./-]\s?(20\d{2})/;
 
-/** Texto OCR/PDF de una factura PDVSA -> campos */
+/**
+ * Texto OCR/PDF de una factura PDVSA -> campos. Equivalencias con el Excel:
+ *  FECHA EMISION -> fecha_emision · CLIENTE -> codigo · NRO. ORDEN ("PD BG ALBALAGO") -> estacion
+ *  FACTURA -> nro_factura · Total a pagar (Bs.) -> total_factura
+ */
 export function parseFactura(raw: string, estaciones: Estacion[]): Extracted {
   const text = raw.replace(/\r/g, "");
   const flat = text.replace(/\s+/g, " ");
@@ -50,7 +54,7 @@ export function parseFactura(raw: string, estaciones: Estacion[]): Extracted {
   const ctrl = /CONTROL\s*:?\s*([0O]{2}\s*-\s*[\d\s]{7,10})/i.exec(flat)?.[1];
   if (ctrl) out.nro_control = ctrl.replace(/O/g, "0").replace(/\s/g, "");
 
-  const fe = /EMISI[OÓ0]N[^\d]{0,40}(\d{2})\s?[./-]\s?(\d{2})\s?[./-]\s?(20\d{2})/i.exec(flat) ?? DATE_RE.exec(flat);
+  const fe = /EMISI[OÓ0]N[^\d]{0,70}(\d{2})\s?[./-]\s?(\d{2})\s?[./-]\s?(20\d{2})/i.exec(flat) ?? DATE_RE.exec(flat);
   if (fe && !out.fecha_emision) out.fecha_emision = toIso(fe[1], fe[2], fe[3]) ?? undefined;
 
   // El total aparece varias veces (Total a pagar, Monto Exento, Monto Bs.): tomamos el más repetido / mayor.
@@ -62,13 +66,24 @@ export function parseFactura(raw: string, estaciones: Estacion[]): Extracted {
     out.total_factura = String(total);
   }
 
+  // Estación: la casilla NRO. ORDEN ("PD BG ALBALAGO") manda; luego Solicitante ("E/S ALBALAGO"); luego todo el texto.
+  const orden =
+    /\bP\.?\s?D\.?\s+B\.?\s?G\.?\s+([A-ZÑ][A-ZÑ.\s]{2,30})/i.exec(flat)?.[1] ??
+    /N\s*R\s*O\.?\s*(?:DE\s*)?ORDEN\W{0,5}([^\n]{0,80})/i.exec(flat)?.[1];
   const solicitante = /Solicitante\s*:?\s*([^\n|]{3,40})/i.exec(text)?.[1];
-  const est = matchEstacion(solicitante, estaciones) ?? matchEstacion(text, estaciones);
+  const est =
+    matchEstacion(orden, estaciones) ??
+    (head ? matchEstacion(head.estacionTexto, estaciones) : null) ??
+    matchEstacion(solicitante, estaciones) ??
+    matchEstacion(text, estaciones);
   if (est) out.estacion = est;
   return out;
 }
 
-/** Texto de comprobante Banco del Tesoro -> campos de pago */
+/**
+ * Texto del comprobante Banco del Tesoro ("Resumen de la operación") -> campos de pago:
+ *  Monto Bs. -> pago_bs · Fecha -> fecha_pago · Número de Referencia -> referencia
+ */
 export function parseComprobante(raw: string, estaciones: Estacion[]): Extracted & { concepto?: string } {
   const text = raw.replace(/\r/g, "");
   const out: Extracted & { concepto?: string } = {};
@@ -80,15 +95,21 @@ export function parseComprobante(raw: string, estaciones: Estacion[]): Extracted
     if (e) out.estacion = e;
   }
 
-  const monto = /Monto\s*Bs\.?\s*:?\s*([\d.\s]+,\s?\d{2})/i.exec(text)?.[1];
+  // Respaldos sin etiqueta solo si el texto es de verdad un comprobante (no la factura)
+  const esComprobante = /Resumen\s*de\s*la\s*operaci|Referencia|Tesoro|Beneficiario/i.test(text);
+  const monto =
+    /Monto\s*Bs\.?\s*:?\s*([\d. ]+,\s?\d{2})/i.exec(text)?.[1] ?? (esComprobante ? text.match(AMOUNT_RE)?.[0] : undefined);
   const m = parseMonto(monto?.replace(/\s/g, ""));
   if (m != null) out.pago_bs = String(m);
 
   const fp =
-    /Fecha\s*:?\s*(\d{2})\/(\d{2})\/(20\d{2})/i.exec(text) ?? /Fecha\s*:?\s*(\d{2})-(\d{2})-(20\d{2})/i.exec(text);
+    /Fecha\s*:?\s*(\d{2})\/(\d{2})\/(20\d{2})/i.exec(text) ??
+    /Fecha\s*:?\s*(\d{2})-(\d{2})-(20\d{2})/i.exec(text) ??
+    (esComprobante ? /\b(\d{2})\/(\d{2})\/(20\d{2})\b/.exec(text) : null);
   if (fp) out.fecha_pago = toIso(fp[1], fp[2], fp[3]) ?? undefined;
 
-  const ref = /Referencia\s*:?\s*(\d[\d\s]{4,})/i.exec(text)?.[1];
+  // "Número de Referencia: 121044066" (sin saltar de línea, para no pegar otros números)
+  const ref = /(?:N[uú]mero\s*de\s*)?Referencia\s*:?\s*(\d[\d ]{4,})/i.exec(text)?.[1];
   if (ref) out.referencia = ref.replace(/\s/g, "");
 
   const concepto = /Concepto\s*:?\s*([^\n]+)/i.exec(text)?.[1]?.trim();

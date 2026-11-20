@@ -24,18 +24,19 @@ const SCHEMA = {
     "concepto",
   ],
   properties: {
-    nro_factura: { type: ["string", "null"], description: "Número de FACTURA PDVSA (9 dígitos, ej. 321049798)" },
+    nro_factura: { type: ["string", "null"], description: "Factura PDVSA: valor de la casilla FACTURA (9 dígitos, ej. 321057432)" },
     nro_control: { type: ["string", "null"], description: "Nº DE CONTROL, ej. 00-18812889" },
-    codigo_cliente: { type: ["string", "null"], description: "Código CLIENTE, ej. 509002" },
-    fecha_emision: { type: ["string", "null"], description: "FECHA EMISION de la factura en formato YYYY-MM-DD" },
+    codigo_cliente: { type: ["string", "null"], description: "Factura PDVSA: valor de la casilla CLIENTE (código, ej. 509002)" },
+    fecha_emision: { type: ["string", "null"], description: "Factura PDVSA: casilla FECHA EMISION (viene DD.MM.YYYY), en formato YYYY-MM-DD" },
     estacion: {
       type: ["string", "null"],
-      description: "Nombre de la estación del campo 'Solicitante' (sin prefijos E/S o M/P), ej. ALBALAGO",
+      description:
+        "Factura PDVSA: estación de servicio según la casilla NRO. ORDEN (ej. 'PD BG ALBALAGO' -> ALBALAGO), sin prefijos PD BG, E/S o M/P. Si no se lee, usa el campo Solicitante",
     },
-    total_factura: { type: ["number", "null"], description: "Total a pagar de la factura en Bs, como número" },
-    pago_bs: { type: ["number", "null"], description: "Monto Bs. del comprobante de pago, como número" },
-    fecha_pago: { type: ["string", "null"], description: "Fecha del comprobante de pago en formato YYYY-MM-DD" },
-    referencia: { type: ["string", "null"], description: "Número de Referencia del comprobante de pago" },
+    total_factura: { type: ["number", "null"], description: "Factura PDVSA: Total a pagar (Bs.), como número" },
+    pago_bs: { type: ["number", "null"], description: "Comprobante 'Resumen de la operación': campo Monto Bs., como número" },
+    fecha_pago: { type: ["string", "null"], description: "Comprobante 'Resumen de la operación': campo Fecha (DD/MM/YYYY), en formato YYYY-MM-DD" },
+    referencia: { type: ["string", "null"], description: "Comprobante 'Resumen de la operación': campo Número de Referencia" },
     concepto: { type: ["string", "null"], description: "Concepto del comprobante de pago" },
   },
 } as const;

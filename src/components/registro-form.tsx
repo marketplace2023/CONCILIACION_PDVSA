@@ -8,9 +8,11 @@ function Field({
   children,
   error,
   auto,
+  hint,
   className,
 }: {
   label: string;
+  hint?: string;
   children: ReactNode;
   error?: string;
   auto?: boolean;
@@ -27,6 +29,7 @@ function Field({
         )}
       </span>
       {children}
+      {hint && !error && <span className="mt-1 block text-[11px] text-muted-foreground">{hint}</span>}
       {error && <span className="mt-1 block text-[11px] text-destructive">{error}</span>}
     </label>
   );
@@ -53,15 +56,15 @@ export function RegistroForm({
   return (
     <div className="space-y-5">
       <fieldset>
-        <legend className="mb-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">Factura</legend>
+        <legend className="mb-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">Factura PDVSA</legend>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <Field label="N° Factura *" error={errors.nro_factura} auto={autoFields?.has("nro_factura")}>
+          <Field label="N° Factura *" hint="En la factura: casilla FACTURA" error={errors.nro_factura} auto={autoFields?.has("nro_factura")}>
             <input className={cls("nro_factura")} inputMode="numeric" value={value.nro_factura} onChange={set("nro_factura")} placeholder="321049798" />
           </Field>
-          <Field label="Fecha de emisión *" error={errors.fecha_emision} auto={autoFields?.has("fecha_emision")}>
+          <Field label="Fecha de emisión *" hint="En la factura: FECHA EMISION" error={errors.fecha_emision} auto={autoFields?.has("fecha_emision")}>
             <input type="date" className={cls("fecha_emision")} value={value.fecha_emision} onChange={set("fecha_emision")} />
           </Field>
-          <Field label="Estación de servicio *" error={errors.estacion} auto={autoFields?.has("estacion")}>
+          <Field label="Estación de servicio *" hint="En la factura: NRO. ORDEN" error={errors.estacion} auto={autoFields?.has("estacion")}>
             <input
               className={cls("estacion")}
               list="estaciones-list"
@@ -75,28 +78,28 @@ export function RegistroForm({
               ))}
             </datalist>
           </Field>
-          <Field label="Código" auto={autoFields?.has("codigo")}>
+          <Field label="Código" hint="En la factura: CLIENTE" auto={autoFields?.has("codigo")}>
             <input className={cls("codigo")} inputMode="numeric" value={value.codigo} onChange={set("codigo")} />
           </Field>
-          <Field label="N° de control" auto={autoFields?.has("nro_control")}>
+          <Field label="N° de control" hint="En la factura: Nº DE CONTROL" auto={autoFields?.has("nro_control")}>
             <input className={cls("nro_control")} value={value.nro_control} onChange={set("nro_control")} placeholder="00-18812889" />
           </Field>
-          <Field label="Total factura (Bs.)" auto={autoFields?.has("total_factura")}>
+          <Field label="Total factura (Bs.)" hint="En la factura: Total a pagar (Bs.)" auto={autoFields?.has("total_factura")}>
             <input className={cls("total_factura")} inputMode="decimal" value={value.total_factura} onChange={set("total_factura")} placeholder="5304400.32" />
           </Field>
         </div>
       </fieldset>
 
       <fieldset>
-        <legend className="mb-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">Pago</legend>
+        <legend className="mb-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">Pago · Resumen de la operación</legend>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <Field label="Pago Bs." error={errors.pago_bs} auto={autoFields?.has("pago_bs")}>
+          <Field label="Pago Bs." hint="En el comprobante: Monto Bs." error={errors.pago_bs} auto={autoFields?.has("pago_bs")}>
             <input className={cls("pago_bs")} inputMode="decimal" value={value.pago_bs} onChange={set("pago_bs")} placeholder="5304400.32" />
           </Field>
-          <Field label="Fecha de pago" auto={autoFields?.has("fecha_pago")}>
+          <Field label="Fecha de pago" hint="En el comprobante: Fecha" auto={autoFields?.has("fecha_pago")}>
             <input type="date" className={cls("fecha_pago")} value={value.fecha_pago} onChange={set("fecha_pago")} />
           </Field>
-          <Field label="Referencia de pago" error={errors.referencia} auto={autoFields?.has("referencia")}>
+          <Field label="Referencia de pago" hint="En el comprobante: Número de Referencia" error={errors.referencia} auto={autoFields?.has("referencia")}>
             <input className={cls("referencia")} inputMode="numeric" value={value.referencia} onChange={set("referencia")} placeholder="112134782" />
           </Field>
         </div>
