@@ -1,0 +1,23 @@
+[Unit]
+Description=Conciliacion PDVSA (API)
+After=network.target
+
+[Service]
+Type=simple
+User=conciliacion
+Group=conciliacion
+WorkingDirectory=/opt/conciliacion/app
+EnvironmentFile=/etc/conciliacion.env
+ExecStart=/usr/local/bin/node /opt/conciliacion/app/node_modules/tsx/dist/cli.mjs server/index.ts
+Restart=on-failure
+RestartSec=3
+KillSignal=SIGTERM
+TimeoutStopSec=15
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/conciliacion
+
+[Install]
+WantedBy=multi-user.target
