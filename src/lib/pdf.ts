@@ -90,13 +90,11 @@ export async function analizarPdfModelo(
       estacion: fac?.estacion ?? "",
     };
     if (!ps.length) {
-      items.push({ key: `${file.name}-${f}`, draft: { ...base, observaciones: "Sin comprobante de pago en el PDF" }, facturaPage: fac?.page ?? null, comprobantePage: null, archivo: file.name });
+      items.push({ key: `${file.name}-${f}`, draft: base, facturaPage: fac?.page ?? null, comprobantePage: null, archivo: file.name });
       continue;
     }
     ps.forEach((p, i) => {
       const d = p.data;
-      const concepto = d.concepto ?? "";
-      const parcial = ps.length > 1 || /\b(2DO|SEGUNDO|ABONO|PARCIAL|RESTO)\b/i.test(concepto);
       items.push({
         key: `${file.name}-${f}-${d.referencia ?? i}`,
         draft: {
@@ -106,7 +104,6 @@ export async function analizarPdfModelo(
           pago_bs: d.pago_bs ?? "",
           fecha_pago: d.fecha_pago ?? "",
           referencia: d.referencia ?? "",
-          observaciones: parcial ? `Pago ${i + 1} de ${ps.length}. Concepto: ${concepto}` : "",
         },
         facturaPage: fac?.page ?? null,
         comprobantePage: p.page,

@@ -241,7 +241,7 @@ export function ImportarPdfPage() {
                         <td className="tabular px-3 py-2">{f.draft.referencia || "—"}</td>
                         <td className="px-3 py-2">
                           <span
-                            title={f.msg ?? f.draft.observaciones}
+                            title={f.msg}
                             className={cn("inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap", b.cls)}
                           >
                             {b.icon} {f.estado === "listo" && !f.draft.referencia ? "Sin pago" : b.label}
